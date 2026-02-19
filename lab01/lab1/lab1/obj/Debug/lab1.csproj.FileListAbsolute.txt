@@ -1,0 +1,21 @@
+C:\simulation course\lab1\lab1\bin\Debug\lab1.exe.config
+C:\simulation course\lab1\lab1\bin\Debug\lab1.exe
+C:\simulation course\lab1\lab1\bin\Debug\lab1.pdb
+C:\simulation course\lab1\lab1\obj\Debug\lab1.csproj.AssemblyReference.cache
+C:\simulation course\lab1\lab1\obj\Debug\lab1.Form1.resources
+C:\simulation course\lab1\lab1\obj\Debug\lab1.Properties.Resources.resources
+C:\simulation course\lab1\lab1\obj\Debug\lab1.csproj.GenerateResource.cache
+C:\simulation course\lab1\lab1\obj\Debug\lab1.csproj.CoreCompileInputs.cache
+C:\simulation course\lab1\lab1\obj\Debug\lab1.exe
+C:\simulation course\lab1\lab1\obj\Debug\lab1.pdb
+C:\simulation course\lab1\lab1\obj\Debug\lab1.exe.config
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\bin\Debug\lab1.exe.config
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\bin\Debug\lab1.exe
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\bin\Debug\lab1.pdb
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\obj\Debug\lab1.csproj.AssemblyReference.cache
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\obj\Debug\lab1.Form1.resources
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\obj\Debug\lab1.Properties.Resources.resources
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\obj\Debug\lab1.csproj.GenerateResource.cache
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\obj\Debug\lab1.csproj.CoreCompileInputs.cache
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\obj\Debug\lab1.exe
+C:\Users\Daniil\Desktop\ИМ\lab01\lab1\lab1\obj\Debug\lab1.pdb
