@@ -112,7 +112,7 @@ namespace lab5
             labelTitle2.Location = new Point(10, 15);
 
             // labelAnswer2
-            labelAnswer2.Text = "Задай вопрос...";
+            labelAnswer2.Text = "Всё ли у меня хорошо?";
             labelAnswer2.Font = new Font("Arial", 15, FontStyle.Bold);
             labelAnswer2.ForeColor = Color.DarkBlue;
             labelAnswer2.AutoSize = false;
