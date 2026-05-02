@@ -26,14 +26,14 @@ namespace lab6_2
             double u1 = NextDouble();
             double u2 = NextDouble();
 
-            double z = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2);
+            double z = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2); // норм распр велечина N(0;1)
             return z;
         }
 
         // Генерация нормальной СВ с параметрами a (среднее) и sigma (стандартное отклонение)
         static double GenerateNormal(double a, double sigma)
         {
-            return a + sigma * GenerateNormalStandard();
+            return a + sigma * GenerateNormalStandard();  
         }
 
         List<double> samples;
@@ -72,9 +72,24 @@ namespace lab6_2
 
         private void ProcessStatistics(double theoreticalMean, double theoreticalVariance, int n)
         {
-            double empiricalMean = samples.Average();
-            double empiricalVariance = samples.Average(x => Math.Pow(x - empiricalMean, 2));
+            // Эмпирическое среднее 
+            double sum = 0;
+            foreach (var x in samples)
+            {
+                sum += x;
+            }
+            double empiricalMean = sum / n;
 
+            // Эмпирическая дисперсия
+            double sumSquaredDiff = 0;
+            foreach (var x in samples)
+            {
+                double diff = x - empiricalMean;
+                sumSquaredDiff += diff * diff;
+            }
+            double empiricalVariance = sumSquaredDiff / n;
+
+            // ПОГРЕШНОСТИ
             double meanError = Math.Abs(empiricalMean - theoreticalMean);
             double meanRelativeError = theoreticalMean != 0 ?
                 (meanError / Math.Abs(theoreticalMean)) * 100 : 0;
@@ -83,17 +98,17 @@ namespace lab6_2
             double varianceRelativeError = theoreticalVariance != 0 ?
                 (varianceError / Math.Abs(theoreticalVariance)) * 100 : 0;
 
-            // Строим гистограмму и считаем χ²
-            int numIntervals = 7; // Количество интервалов
+            // ГИСТОГРАММА И χ²
+            int numIntervals = 7;
             double chiSquared = BuildHistogramAndChiSquared(theoreticalMean,
                 Math.Sqrt(theoreticalVariance), n, numIntervals);
 
-            // === НОВОЕ: Критическое значение χ² ===
-            int degreesOfFreedom = numIntervals - 1; // m - 1
+            // КРИТИЧЕСКОЕ ЗНАЧЕНИЕ χ²
+            int degreesOfFreedom = numIntervals - 1;
             double chiSquaredCritical = GetChiSquaredCritical(degreesOfFreedom);
             bool hypothesisRejected = chiSquared > chiSquaredCritical;
 
-            // Вывод результатов
+            // ВЫВОД РЕЗУЛЬТАТОВ
             lblResults.Text = $"Среднее (теор.): {theoreticalMean:F3}\n" +
                              $"Среднее (эмп.): {empiricalMean:F3}\n" +
                              $"Погрешность: {(theoreticalMean != 0 ? meanRelativeError.ToString("F1") + "%" : "N/A (mean=0)")}\n\n" +
@@ -150,7 +165,7 @@ namespace lab6_2
             {
                 double left = minVal + i * intervalWidth;
                 double right = left + intervalWidth;
-
+                    
                 // Теоретическая вероятность попадания в интервал
                 double theoreticalProb = NormalCDF(right, mean, sigma) -
                                         NormalCDF(left, mean, sigma);
