@@ -48,25 +48,51 @@ namespace lab6_2
         {
             try
             {
-                double mean = double.Parse(txtMean.Text);
-                double variance = double.Parse(txtVariance.Text);
-                int n = int.Parse(txtSampleSize.Text);
+                if (!double.TryParse(txtMean.Text.Replace(',', '.'),
+                    System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out double mean))
+                {
+                    MessageBox.Show("Введите корректное число для Mean (например: 0 или 5.5)", "Ошибка ввода");
+                    return;
+                }
+
+                if (!double.TryParse(txtVariance.Text.Replace(',', '.'),
+                    System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out double variance))
+                {
+                    MessageBox.Show("Введите корректное число для Variance", "Ошибка ввода");
+                    return;
+                }
+
+                if (variance <= 0)
+                {
+                    MessageBox.Show("Дисперсия (Variance) должна быть СТРОГО БОЛЬШЕ НУЛЯ!\n" +
+                                    "При значении 0 или меньше формула нормального распределения ломается.",
+                                    "Ошибка ввода",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                    return; 
+                }
+
+                if (!int.TryParse(txtSampleSize.Text, out int n) || n <= 0)
+                {
+                    MessageBox.Show("Объем выборки (N) должен быть целым числом больше 0", "Ошибка ввода");
+                    return;
+                }
 
                 double sigma = Math.Sqrt(variance);
                 samples.Clear();
 
-                // Генерируем выборку
                 for (int i = 0; i < n; i++)
                 {
                     samples.Add(GenerateNormal(mean, sigma));
                 }
 
-                // Статистическая обработка
                 ProcessStatistics(mean, variance, n);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}");
+                MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message);
             }
         }
 
@@ -286,7 +312,7 @@ namespace lab6_2
 
                 if (points.Count > 1)
                     g.DrawLines(curvePen, points.ToArray());
-            }
+            }   
 
             chartPanel.Image = bmp;
         }
