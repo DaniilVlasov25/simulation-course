@@ -122,16 +122,33 @@ namespace lab6
             return variance;
         }
 
-        // Расчёт статистики хи-квадрат
+        //Расчёт критерия χ²
         private double CalculateChiSquared()
         {
             double chiSquared = 0;
+            int validIntervals = 0;
+
             for (int i = 0; i < values.Length; i++)
             {
                 double expected = probabilities[i] * totalExperiments;
+
+                // Пропускаем интервалы с нулевой ожидаемой частотой
+                if (expected < 1)  // Рекомендуется expected >= 5 для точности
+                {
+                    continue;
+                }
+
                 double observed = countValues[i];
                 chiSquared += Math.Pow(observed - expected, 2) / expected;
+                validIntervals++;
             }
+
+            if (validIntervals == 0)
+            {
+                // Если все интервалы пропущены, возвращаем 0
+                return 0;
+            }
+
             return chiSquared;
         }
 
@@ -151,91 +168,157 @@ namespace lab6
         }
 
         private void btnStart_Click(object sender, EventArgs e)
+{
+    try
+    {
+        // Чтение и валидация вероятностей
+        double[] inputProbs = new double[]
         {
-            try
+            double.Parse(txtProb1.Text.Replace(',', '.'), CultureInfo.InvariantCulture),
+            double.Parse(txtProb2.Text.Replace(',', '.'), CultureInfo.InvariantCulture),
+            double.Parse(txtProb3.Text.Replace(',', '.'), CultureInfo.InvariantCulture),
+            double.Parse(txtProb4.Text.Replace(',', '.'), CultureInfo.InvariantCulture),
+            double.Parse(txtProb5.Text.Replace(',', '.'), CultureInfo.InvariantCulture)
+        };
+
+        // Проверка на отрицательные значения
+        for (int i = 0; i < inputProbs.Length; i++)
+        {
+            if (inputProbs[i] < 0)
             {
-                // Используем InvariantCulture для парсинга чисел с точкой
-                probabilities = new double[]
-                {
-                    double.Parse(txtProb1.Text, CultureInfo.InvariantCulture),
-                    double.Parse(txtProb2.Text, CultureInfo.InvariantCulture),
-                    double.Parse(txtProb3.Text, CultureInfo.InvariantCulture),
-                    double.Parse(txtProb4.Text, CultureInfo.InvariantCulture),
-                    double.Parse(txtProb5.Text, CultureInfo.InvariantCulture)
-                };
-
-                // Нормализуем вероятности (чтобы сумма была 1)
-                double sum = probabilities.Sum();
-                for (int i = 0; i < probabilities.Length; i++)
-                {
-                    probabilities[i] /= sum;
-                }
-
-                // Считываем количество экспериментов
-                int n = int.Parse(txtNumExperiments.Text);
-                totalExperiments = n;
-
-                // Сбрасываем счётчики
-                countValues = new int[values.Length];
-
-                // Проводим эксперименты
-                for (int i = 0; i < n; i++)
-                {
-                    int index = GenerateDSV();
-                    countValues[index]++;
-                }
-
-                // Расчёт статистики
-                double theoreticalMean = CalculateTheoreticalMean();
-                double theoreticalVariance = CalculateTheoreticalVariance();
-                double empiricalMean = CalculateEmpiricalMean();
-                double empiricalVariance = CalculateEmpiricalVariance();
-                double chiSquared = CalculateChiSquared();
-
-                // Погрешности
-                double meanError = Math.Abs(empiricalMean - theoreticalMean);
-                double meanRelativeError = theoreticalMean != 0 ?
-                    (meanError / Math.Abs(theoreticalMean)) * 100 : 0;
-
-                double varianceError = Math.Abs(empiricalVariance - theoreticalVariance);
-                double varianceRelativeError = theoreticalVariance != 0 ?
-                    (varianceError / Math.Abs(theoreticalVariance)) * 100 : 0;
-
-                // Критерий хи-квадрат
-                int degreesOfFreedom = values.Length - 1;
-                double chiSquaredCritical = GetChiSquaredCritical(degreesOfFreedom);
-                bool hypothesisRejected = chiSquared > chiSquaredCritical;
-
-                // Вывод результатов
-                lblResults.Text = $"Теоретическое среднее: {theoreticalMean:F3}\n" +
-                                 $"Эмпирическое среднее: {empiricalMean:F3}\n" +
-                                 $"Погрешность среднего: {meanRelativeError:F1}%\n\n" +
-                                 $"Теоретическая дисперсия: {theoreticalVariance:F3}\n" +
-                                 $"Эмпирическая дисперсия: {empiricalVariance:F3}\n" +
-                                 $"Погрешность дисперсии: {varianceRelativeError:F1}%\n\n" +
-                                 $"χ² = {chiSquared:F2}\n" +
-                                 $"χ² критическое = {chiSquaredCritical:F3}\n" +
-                                 $"Гипотеза {(hypothesisRejected ? "ОТВЕРГАЕТСЯ" : "ПРИНИМАЕТСЯ")}";
-
-                // Рисуем гистограмму
-                DrawHistogram();
-
-                // Вывод частот (Таблица частот)
-                string freqText = "Частоты:\n";
-                for (int i = 0; i < values.Length; i++)
-                {
-                    double freq = (double)countValues[i] / n;
-                    // Форматируем вывод: Значение: Количество (Процент)
-                    freqText += $"x={values[i]}: {countValues[i]} ({freq:P2})\n";
-                }
-                lblFrequencies.Text = freqText;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка: {ex.Message}");
+                MessageBox.Show($"Вероятность Prob {i+1} не может быть отрицательной ({inputProbs[i]}).\n" +
+                              $"Вероятность должна быть >= 0", 
+                              "Ошибка ввода", 
+                              MessageBoxButtons.OK, 
+                              MessageBoxIcon.Warning);
+                return; // Прерываем выполнение
             }
         }
 
+        // Проверка на нулевые вероятности (предупреждение)
+        int zeroCount = inputProbs.Count(p => p == 0);
+        if (zeroCount > 0)
+        {
+            DialogResult result = MessageBox.Show(
+                $"Обнаружено {zeroCount} нулевых вероятностей.\n" +
+                $"Это может привести к ошибкам при расчёте χ² (деление на ноль).\n\n" +
+                $"Продолжить?",
+                "Предупреждение",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            
+            if (result == DialogResult.No)
+                return; // Прерываем выполнение
+        }
+
+        // Проверка суммы вероятностей
+        double sum = inputProbs.Sum();
+        if (sum <= 0)
+        {
+            MessageBox.Show("Сумма вероятностей должна быть больше 0!\n" +
+                          $"Текущая сумма: {sum}", 
+                          "Ошибка ввода", 
+                          MessageBoxButtons.OK, 
+                          MessageBoxIcon.Error);
+            return;
+        }
+
+        // Нормализация вероятностей (чтобы сумма была равна 1)
+        probabilities = inputProbs.Select(p => p / sum).ToArray();
+
+        // Чтение объёма выборки
+        if (!int.TryParse(txtNumExperiments.Text, out int n) || n <= 0)
+        {
+            MessageBox.Show("Объём выборки должен быть положительным целым числом!", 
+                          "Ошибка ввода", 
+                          MessageBoxButtons.OK, 
+                          MessageBoxIcon.Error);
+            return;
+        }
+
+        if (n < 10)
+        {
+            DialogResult result = MessageBox.Show(
+                $"Объём выборки {n} слишком мал для статистической обработки.\n" +
+                $"Рекомендуется N >= 100.\n\n" +
+                $"Продолжить?",
+                "Предупреждение",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            
+            if (result == DialogResult.No)
+                return;
+        }
+
+        totalExperiments = n;
+        countValues = new int[probabilities.Length];
+
+        // Генерация выборки
+        for (int i = 0; i < n; i++)
+        {
+            int index = GenerateDSV();
+            countValues[index]++;
+        }
+
+        // Расчёт характеристик
+        double theoreticalMean = CalculateTheoreticalMean();
+        double theoreticalVariance = CalculateTheoreticalVariance();
+        double empiricalMean = CalculateEmpiricalMean();
+        double empiricalVariance = CalculateEmpiricalVariance();
+        
+        // Расчёт χ² с защитой от деления на ноль
+        double chiSquared = CalculateChiSquared();
+
+        double meanError = Math.Abs(empiricalMean - theoreticalMean);
+        double meanRelativeError = theoreticalMean != 0 ? 
+            (meanError / Math.Abs(theoreticalMean)) * 100 : 0;
+
+        double varianceError = Math.Abs(empiricalVariance - theoreticalVariance);
+        double varianceRelativeError = theoreticalVariance != 0 ? 
+            (varianceError / Math.Abs(theoreticalVariance)) * 100 : 0;
+
+        int degreesOfFreedom = values.Length - 1;
+        double chiSquaredCritical = GetChiSquaredCritical(degreesOfFreedom);
+        bool hypothesisRejected = chiSquared > chiSquaredCritical;
+
+        // Вывод результатов
+        lblResults.Text = $"Теоретическое среднее: {theoreticalMean:F3}\n" +
+                         $"Эмпирическое среднее: {empiricalMean:F3}\n" +
+                         $"Погрешность среднего: {meanRelativeError:F1}%\n\n" +
+                         $"Теоретическая дисперсия: {theoreticalVariance:F3}\n" +
+                         $"Эмпирическая дисперсия: {empiricalVariance:F3}\n" +
+                         $"Погрешность дисперсии: {varianceRelativeError:F1}%\n\n" +
+                         $"χ² = {chiSquared:F2}\n" +
+                         $"χ² критическое = {chiSquaredCritical:F3}\n" +
+                         $"Гипотеза {(hypothesisRejected ? "ОТВЕРГАЕТСЯ" : "ПРИНИМАЕТСЯ")}";
+
+        DrawHistogram();
+
+        // Вывод частот
+        string freqText = "Частоты:\n";
+        for (int i = 0; i < values.Length; i++)
+        {
+            double freq = (double)countValues[i] / n;
+            freqText += $"x={values[i]}: {countValues[i]} ({freq:P2})\n";
+        }
+        lblFrequencies.Text = freqText;
+    }
+    catch (FormatException)
+    {
+        MessageBox.Show("Неверный формат чисел!\n" +
+                      "Используйте точки или запятые для десятичных дробей.", 
+                      "Ошибка ввода", 
+                      MessageBoxButtons.OK, 
+                      MessageBoxIcon.Error);
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Произошла ошибка: {ex.Message}", 
+                      "Ошибка", 
+                      MessageBoxButtons.OK, 
+                      MessageBoxIcon.Error);
+    }
+}
 
         private void DrawHistogram()
         {
